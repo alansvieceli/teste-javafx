@@ -9,24 +9,30 @@ import javafx.scene.control.ScrollPane;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-	
+
+	private static Scene mainScene;
+
 	@Override
 	public void start(Stage primaryStage) {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/MainView.fxml"));
 			ScrollPane scrollPane = loader.load();
-			
+
 			scrollPane.setFitToHeight(true);
-			scrollPane.setFitToWidth(true);			
-			
-			Scene mainScene = new Scene(scrollPane);
-			
+			scrollPane.setFitToWidth(true);
+
+			Main.mainScene = new Scene(scrollPane);
+
 			primaryStage.setScene(mainScene);
 			primaryStage.setTitle("Teste JavaFX / JDBC / MySQL");
 			primaryStage.show();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static Scene getMainScene() {
+		return Main.mainScene;
 	}
 
 	public static void main(String[] args) {
