@@ -2,9 +2,10 @@ package gui;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import db.DbException;
 import gui.listeners.DataChangeListener;
@@ -19,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entities.Departamento;
+import model.exceptions.ValidationException;
 import model.services.DepartamentoService;
 
 public class DepartamentoFormController implements Initializable {
@@ -78,6 +80,8 @@ public class DepartamentoFormController implements Initializable {
 			Utils.currentStage(event).close();
 		} catch (DbException e) {
 			Alerts.showAlert("Erro ao salvar objeto", null, e.getMessage(), AlertType.ERROR);
+		} catch (ValidationException e ) {
+			setErrorMessages(e.getErros());
 		}
 		
 
@@ -102,9 +106,18 @@ public class DepartamentoFormController implements Initializable {
 	private Departamento getFormData() {
 		Departamento obj = new Departamento();
 		
-		
+		ValidationException erro = new ValidationException("Erros de Validação: ");
+				
 		obj.setId(Utils.tryParseToInt(txtId.getText()));
+		
+		if (txtNome.getText() == null || txtNome.getText().trim().equals("")) {
+			erro.addErro("nome", "Nome não pode ser em branco...");
+		}
 		obj.setNome(txtNome.getText());
+		
+		if (erro.getErros().size() > 0) {
+			throw erro;
+		}
 		
 		return obj;
 	}
@@ -116,4 +129,12 @@ public class DepartamentoFormController implements Initializable {
 		
 	}
 
+	private void setErrorMessages(Map<String, String> erros) {
+		Set<String> keys = erros.keySet();
+		
+		if (keys.contains("nome")) {
+			lblErro.setText(erros.get("nome"));
+		}
+		
+	}
 }
