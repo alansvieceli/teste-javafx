@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import application.Main;
+import gui.listeners.DataChangeListener;
 import gui.utils.Alerts;
 import gui.utils.Utils;
 import javafx.collections.FXCollections;
@@ -26,7 +27,7 @@ import javafx.stage.Stage;
 import model.entities.Departamento;
 import model.services.DepartamentoService;
 
-public class DepartamentoListaController implements Initializable {
+public class DepartamentoListaController implements Initializable, DataChangeListener {
 	
 	private DepartamentoService service;
 	
@@ -40,7 +41,7 @@ public class DepartamentoListaController implements Initializable {
 	private TableColumn<Departamento, String> tableColumnNome;
 	
 	@FXML 
-	Button btInserir;
+	private Button btInserir;
 	
 	private ObservableList<Departamento> obsList;
 	
@@ -53,8 +54,7 @@ public class DepartamentoListaController implements Initializable {
 	public void initialize(URL url, ResourceBundle rb) {
 		InicializeNodes();		
 	}
-	
-	//Injeç~;ao de dependencia, principio SOLID
+
 	public void setDepartamentoService(DepartamentoService service) {
 		this.service = service;		
 	}
@@ -90,6 +90,7 @@ public class DepartamentoListaController implements Initializable {
 			DepartamentoFormController controller = loader.getController();
 			controller.setDepartamento(departamento);
 			controller.setDepartamentoService(new DepartamentoService());
+			controller.addDataChangeListener(this); //inscrição no objserver
 			controller.updateFormData();
 			
 			Stage dialogStage = new Stage();
@@ -104,6 +105,12 @@ public class DepartamentoListaController implements Initializable {
 			Alerts.showAlert("IOException", "Erro ao carregar view", e.getMessage(), AlertType.ERROR);
 		}
 		
+	}
+
+	
+	@Override
+	public void onDataChanged() {
+		updateTableView();		
 	}
 
 }

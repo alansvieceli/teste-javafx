@@ -1,19 +1,23 @@
 package gui;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import db.DbException;
+import gui.listeners.DataChangeListener;
 import gui.utils.Alerts;
 import gui.utils.Constraints;
 import gui.utils.Utils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Alert.AlertType;
 import model.entities.Departamento;
 import model.services.DepartamentoService;
 
@@ -21,6 +25,8 @@ public class DepartamentoFormController implements Initializable {
 
 	private Departamento entity;
 	private DepartamentoService service;
+	
+	private List<DataChangeListener> datachangelisteners = new ArrayList<>();
 
 	@FXML
 	private TextField txtId;
@@ -36,6 +42,12 @@ public class DepartamentoFormController implements Initializable {
 
 	@FXML
 	private Button btCancelar;
+	
+	@Override
+	public void initialize(URL url, ResourceBundle rb) {
+		Constraints.setTextFieldInteger(txtId);
+		Constraints.setTextFieldMaxLength(txtNome, 30);
+	}
 
 	public void setDepartamentoService(DepartamentoService service) {
 		this.service = service;
@@ -44,7 +56,11 @@ public class DepartamentoFormController implements Initializable {
 	public void setDepartamento(Departamento entity) {
 		this.entity = entity;
 	}
-
+	
+	public void addDataChangeListener(DataChangeListener listner) {
+		datachangelisteners.add(listner);
+	}
+	
 	@FXML
 	private void onBtSalvarAction(ActionEvent event) {
 		
@@ -58,6 +74,7 @@ public class DepartamentoFormController implements Initializable {
 		
 		try {
 			service.saveOrUpdate(getFormData());
+			notifyDataChangeListners();
 			Utils.currentStage(event).close();
 		} catch (DbException e) {
 			Alerts.showAlert("Erro ao salvar objeto", null, e.getMessage(), AlertType.ERROR);
@@ -66,15 +83,10 @@ public class DepartamentoFormController implements Initializable {
 
 	}
 
+
 	@FXML
 	private void onBCancelarAction(ActionEvent event) {
 		Utils.currentStage(event).close();
-	}
-
-	@Override
-	public void initialize(URL url, ResourceBundle rb) {
-		Constraints.setTextFieldInteger(txtId);
-		Constraints.setTextFieldMaxLength(txtNome, 30);
 	}
 
 	public void updateFormData() {
@@ -95,6 +107,13 @@ public class DepartamentoFormController implements Initializable {
 		obj.setNome(txtNome.getText());
 		
 		return obj;
+	}
+
+	private void notifyDataChangeListners() {
+		for (DataChangeListener listiner: datachangelisteners) {
+			listiner.onDataChanged();
+		}
+		
 	}
 
 }
